@@ -1,5 +1,5 @@
 <?php
-include_once 'error.php';
+//include_once 'error.php';
 
 include_once './config/database.php';
 require "vendor/autoload.php";
@@ -78,13 +78,14 @@ $query = "INSERT INTO " . $table_name . "
                     lastname = :lastname,
                     email = :email,
                     password = :password,
-                    mobile = :mobile";
+                    mobile = :mobile,statusname = :statusname";
 
 $stmt = $conn->prepare($query);
 $stmt->bindParam(':firstname', $firstname);
 $stmt->bindParam(':lastname', $lastname);
 $stmt->bindParam(':email', $email);
 $stmt->bindParam(':mobile', $mobile);
+$stmt->bindParam(':statusname', 'Active');
 //$stmt->bindParam(':RoleId', $RoleId);
 
 $password_hash = password_hash($password, PASSWORD_BCRYPT);
@@ -92,11 +93,11 @@ $stmt->bindParam(':password', $password_hash);
 
 if($stmt->execute()){
 	http_response_code(200);
-    echo json_encode(array("message" => "User was successfully registered."));
+    echo json_encode(array("Status" => "True","message" => "User was successfully registered."));
 }
 else{
     http_response_code(400);
-	echo json_encode(array("message" => "Unable to register the user."));
+	echo json_encode(array("Status" => "False","message" => "Unable to register the user."));
 }
 
 }

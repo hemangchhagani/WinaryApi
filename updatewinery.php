@@ -29,6 +29,10 @@ $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
 
 $Name ="";
 $Description ="";
+$StateId ="";
+$StateName ="";
+$CityId ="";
+$CityName ="";
 $AddressLine1 ="";
 $AddressLine2 ="";
 $Email ="";
@@ -45,6 +49,10 @@ $conn = $databaseService->getConnection();
 
 $Name = $data->Name;
 $Description = $data->Description;
+$StateId = $data->StateId;
+$StateName = $data->StateName;
+$CityId = $data->CityId;
+$CityName = $data->CityName;
 $AddressLine1 = $data->AddressLine1;
 $AddressLine2 = $data->AddressLine2;
 $Email = $data->Email;
@@ -63,6 +71,10 @@ $table_name = 'winery';
 $stmt = $conn->prepare("UPDATE " . $table_name . "
                 SET Name = :Name,
                 Description = :Description,
+                StateId = :StateId,
+                StateName = :StateName,
+                CityId = :CityId,
+                CityName = :CityName,
                 AddressLine1 = :AddressLine1,
                 AddressLine2 = :AddressLine2,
                 Email = :Email,
@@ -74,6 +86,10 @@ $stmt = $conn->prepare("UPDATE " . $table_name . "
 
 $stmt->bindParam(':Name', $Name );
 $stmt->bindParam(':Description',$Description );
+$stmt->bindParam(':StateId',$StateId );
+$stmt->bindParam(':StateName',$StateName );
+$stmt->bindParam(':CityId',$CityId );
+$stmt->bindParam(':CityName',$CityName);
 $stmt->bindParam(':AddressLine1', $AddressLine1 );
 $stmt->bindParam(':AddressLine2', $AddressLine2 );
 $stmt->bindParam(':Email', $Email );

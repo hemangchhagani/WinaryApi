@@ -16,6 +16,7 @@ $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
 
 $data = json_decode(file_get_contents("php://input"));
+
 //echo "<pre>"; print_r($data);exit;
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
 $arr = explode(" ", $authHeader);
@@ -25,76 +26,59 @@ if($jwt){
 try {
 
 $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
-$Name =" ";
-$Description =" ";
-$WineryId =" ";
-$WineryName=" ";
-$WineTypeId =" ";
-$WineTypeName = " ";
-$Rate =" ";
+$TourDate =" ";
+$UserId =" ";
+$StatusId =" ";
 $CreatedById ="";
+$TourDetails = "";
 
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
+$conn1 = $databaseService->getConnection();
 
-$Name = $data->Name;
-$Description = $data->Description;
-$WineryId = $data->WineryId;
-$WineryName = $data->WineryName;
-$WineTypeId = $data->WineTypeId;
-$WineTypeName = $data->WineTypeName;
-$Rate = $data->Rate;
+$TourDate = $data->TourDate;
+$UserId = $data->UserId;
+$StatusId = $data->StatusId;
 $CreatedById = $data->CreatedById;
+$TourDetails =$data->TourDetails;
 
-$stmt = $conn->prepare("CALL Inswine('$Name','$Description','$WineryId','$WineryName','$WineTypeId','$WineTypeName','$Rate','1','Active','$CreatedById',@Last_ID)");
 
+$stmt = $conn->prepare("CALL Instour('$TourDate','$UserId','1','Active','$CreatedById',@Last_ID)");
 $stmt->execute();
 
-$Images = $data->Images;
 $rs2 = $conn->query("SELECT @Last_ID  as id");
 $row = $rs2->fetchObject();
 $last_id = $row->id;
 
+
 $ok = true;
-foreach($Images as $image){
-  /*  print_r( $image);
-    exit;
-    */
-$oldFileName =$image->fileName;
-$Filebase64 =$image->base64;
-$Filextension = $image->filextension;
+foreach($TourDetails as $tourdetails){
 
-$datetime = date("Y-m-d h:i:s");
-$timestamp = md5(uniqid(rand(), true));
+    
+$WineryId =$tourdetails->WineryId;
+$Feedback =$tourdetails->Feedback;
+$Rating = $tourdetails->Rating;
+$SequenceOrder = $tourdetails->SequenceOrder;
+$StartTime = $tourdetails->StartTime;
+$EndTime = $tourdetails->EndTime;
 
-$data = explode( ',', $Filebase64 );
+$stmt4 = $conn1->prepare("CALL Instourdetails('$last_id','$WineryId','$Feedback','$Rating','$SequenceOrder','$StartTime','$EndTime','1','Active','1')");
 
-$imgdata = base64_decode($data[1]);
-
-$f = finfo_open();
-$mime_type = finfo_buffer($f, $imgdata, FILEINFO_MIME_TYPE);
-$temp=explode('/',$mime_type);
-
-$path = "WineImage/$timestamp.$Filextension";
-
-file_put_contents($path,base64_decode($data[1]));
-
-//echo "Successfully Uploaded->>> $timestamp.$temp[1]";
-
-$FileName = $timestamp.".".$Filextension;
-
-$stmt4 = $conn->prepare("CALL InsWineimage('$last_id','$oldFileName','$FileName','1','Active','$CreatedById')");
 
 $stmt4->execute();
 
 }
 
+
+
+
 if($ok){
+    
    
     
         http_response_code(200);
        
-         echo json_encode(array( "status" => "True","message" => "Wine added successfully."));
+         echo json_encode(array( "status" => "True","message" => "Tour added successfully."));
 }
 else{
         http_response_code(400);

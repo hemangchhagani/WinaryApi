@@ -25,7 +25,9 @@ if($jwt){
 try {
 
 $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
+$Id = "";
 $Name ="";
+$UserTypes = "";
 
 
 $databaseService = new DatabaseService();
@@ -33,27 +35,44 @@ $conn = $databaseService->getConnection();
 
 $Name = $data->Name;
 $Id = $data->Id;
-
+$UserTypes = $data->UserTypes;
 
 //$CreatedById = $data->CreatedById;
 $CreatedById = 1;
 
-$table_name = 'winetype';
-  $query = "UPDATE " . $table_name . "
+$query = "UPDATE winetype
                 SET Name = :Name
                     WHERE Id =:Id ";
                     //echo  $query;exit;
 
 $stmt = $conn->prepare($query);
-
 $stmt->bindParam(':Id', $Id);
-
 $stmt->bindParam(':Name', $Name);
 
+$query3 = "DELETE FROM winetypeusermapping WHERE WineTypeId=:WineTypeId";
 
-//$stmt = $conn->prepare("CALL Updatewinetype(?,?)");
+$stmt3 = $conn->prepare($query3);
+$stmt3->bindParam(':WineTypeId', $Id);
+$stmt3->execute();
 
-//$array = array($Id,$Name);
+
+
+$match = array_diff($UserTypes,$value2); 
+        foreach($UserTypes as $key =>  $val){
+            
+            $query4 = "INSERT INTO winetypeusermapping
+                            SET WineTypeId = :WineTypeId,
+                                UserTypeId = :UserTypeId,
+                                StatusId = 1,
+                                StatusName = 'Active',
+                                CreatedById = :CreatedById";
+            
+            $stmt4 = $conn->prepare($query4);
+            $stmt4->bindParam(':WineTypeId', $Id);
+            $stmt4->bindParam(':UserTypeId', $val );
+            $stmt4->bindParam(':CreatedById', $CreatedById);
+            $stmt4->execute();
+        }
 
 if($stmt->execute()){
 http_response_code(200);

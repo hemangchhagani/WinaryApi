@@ -4,13 +4,11 @@ include_once 'config/database.php';
 require "vendor/autoload.php";
 use \Firebase\JWT\JWT;
 
-//header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-
-
 $email = '';
 $password = '';
 
@@ -22,9 +20,7 @@ $data = json_decode(file_get_contents("php://input"));
 $email = $data->email;
 $password = $data->password;
 
-$table_name = 'user';
-
-$query = "SELECT Id, firstname, lastname, password FROM " . $table_name . " WHERE email = ? LIMIT 0,1";
+$query = "SELECT Id, firstname, lastname, password FROM user WHERE email = ? LIMIT 0,1";
 
 $stmt = $conn->prepare( $query );
 $stmt->bindParam(1, $email);

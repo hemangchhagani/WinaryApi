@@ -17,38 +17,32 @@ $conn = $databaseService->getConnection();
 
 $data = json_decode(file_get_contents("php://input"));
 
-$authHeader = $_SERVER['HTTP_AUTHORIZATION'];
-$arr = explode(" ", $authHeader);
-$jwt = $arr[1];
-if($jwt){
 
-try {
-
-$decoded = JWT::decode($jwt, $secret_key, array('HS256'));
-
+$WineTypeIds =  "";
 
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
 $conn1 = $databaseService->getConnection();
 
-$stmt = $conn->prepare("CALL getWineryalldetails()");
+//$Id =  $data->Id;
+$WineTypeIds =  $data->WineTypeIds;
+$in  = str_repeat('?,', count($WineTypeIds) - 1) . '?';
+$stmt = $conn->prepare("Select winery.Id,winery.name,winery.Description,winery.AddressLine1,winery.AddressLine2,winery.Email,winery.PhoneNumber,winery.Mobile,winery.Latitude,winery.Longitude,winetypemapping.WineTypeId from winery inner join winetypemapping on winery.Id = winetypemapping.WineryId
+WHERE winetypemapping.WineTypeId In ($in) AND winery.StatusId = 1 AND winetypemapping.StatusId =1");
 
-$i = 1;
-if($stmt->execute()){
+
+if($stmt->execute($WineTypeIds)){
+    
     $row = $stmt->fetchall(PDO::FETCH_ASSOC);
-   $result = array() ;
+    $result = array() ;
     foreach($row as $value){
         
         
          $WineryId = $value[Id];
          $rowdetailsreturn = array(
         'Id'=>$value[Id],
-        'Name'=>$value[Name],
+        'Name'=>$value[name],
         'Description'=>$value[Description],
-        'StateId'=>$value[StateId],
-        'StateName'=>$value[StateName],
-        'CityId'=>$value[CityId],
-        'CityName'=>$value[CityName],
         'AddressLine1'=>$value[AddressLine1],
         'AddressLine2'=>$value[AddressLine2],
         'Email'=>$value[Email],
@@ -56,6 +50,8 @@ if($stmt->execute()){
         'Mobile'=>$value[Mobile],
         'Latitude'=>$value[Latitude],
         'Longitude'=>$value[Longitude],
+        'WineTypeId'=>$value[WineTypeId],
+         
         );
         $stmtimage = $conn1->prepare("SELECT * FROM `wineryimagemapping` where `WineryId` = :WineryId  AND StatusId=1 ");
         
@@ -65,41 +61,19 @@ if($stmt->execute()){
         $rowimage1 = $stmtimage->fetchall(PDO::FETCH_ASSOC);
         $rowdetailsreturn['Images'] = $rowimage1;
         
-        $stmtmapping = $conn1->prepare("SELECT * FROM `winetypemapping` where `WineryId` = :WineryId  AND StatusId=1 ");
         
-        $databindmapping = array('WineryId'=>$WineryId );
-        
-        $stmtmapping->execute($databindmapping);
-        $rowmappingtype = $stmtmapping->fetchall(PDO::FETCH_ASSOC);
-        
-        $rowdetailsreturn['WineTypeIds'] = $rowmappingtype;
          array_push($result , $rowdetailsreturn);
 
     $i++;
     }
     
-
     
         http_response_code(200);
-        echo json_encode(array(  "Data" => $result , "status" => "True", "message" => "All Winery Details."));
+        echo json_encode(array(  "Data" => $result , "status" => "True", "message" => "Winery Details."));
 }
 else{
         http_response_code(400);
         echo json_encode(array("message" => "Unable to register the user."));
-}
-
-}catch (Exception $e){
-
-    http_response_code(401);
-
-    echo json_encode(array(
-        "message" => "Access denied.",
-        "error" => $e->getMessage()
-    ));
-
-    // If user is super admin then register.
-}
-
 }
 
 ?>

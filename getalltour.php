@@ -16,7 +16,6 @@ $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
 
 $data = json_decode(file_get_contents("php://input"));
-
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
 $arr = explode(" ", $authHeader);
 $jwt = $arr[1];
@@ -25,59 +24,17 @@ if($jwt){
 try {
 
 $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
-$Name ="";
-$UserTypes = "";
-
-
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
-$conn2 = $databaseService->getConnection();
-
-$Name = $data->Name;
-$UserTypes  = $data->UserTypes;
-
-
-//$CreatedById = $data->CreatedById;
-$CreatedById = 1;
-
-$stmt = $conn->prepare("CALL Inswinetype('$Name','1','Active','$CreatedById',@Last_ID)");
-$stmt->execute();
-
-$rs2 = $conn->query("SELECT @Last_ID  as id");
-$row = $rs2->fetchObject();
-$last_id = $row->id;
-
-$StatusId = 1;
-$StatusName = "Active";
-$CreatedById = "1";
-
-$table_name2 = 'winetypeusermapping';
-$ok = true;
-foreach($UserTypes  as $value ){
-
-$UserTypeId = $value;
-$query = "INSERT INTO " . $table_name2 . "
-                SET WineTypeId = :WineTypeId,
-                    UserTypeId = :UserTypeId,
-                    StatusId = :StatusId,
-                    StatusName = :StatusName,
-                    CreatedById = :CreatedById";
-
-$stmt2 = $conn2->prepare($query);
-$stmt2->bindParam(':WineTypeId', $last_id);
-$stmt2->bindParam(':UserTypeId', $UserTypeId );
-$stmt2->bindParam(':StatusId', $StatusId);
-$stmt2->bindParam(':StatusName', $StatusName);
-$stmt2->bindParam(':CreatedById', $CreatedById);
-$stmt2->execute();
-
-}
-if($ok){
-   
+$stmt = $conn->prepare("SELECT t.* , concat(u.firstname,' ', u.lastname) AS UserName
+FROM  `tour` AS t 
+INNER JOIN user AS u on t.userId = u.Id 
+where t.StatusId =1 ");
+if($stmt->execute()){
+    $row = $stmt->fetchall(PDO::FETCH_ASSOC);
     
         http_response_code(200);
-       
-         echo json_encode(array( "status" => "True","message" => "WineType added successfully."));
+        echo json_encode(array(  "Data" => $row , "status" => "True", "message" => "Tour Details."));
 }
 else{
         http_response_code(400);
@@ -85,17 +42,12 @@ else{
 }
 
 }catch (Exception $e){
-
     http_response_code(401);
-
     echo json_encode(array(
         "message" => "Access denied.",
         "error" => $e->getMessage()
     ));
-
     // If user is super admin then register.
 }
-
 }
-
 ?>

@@ -12,33 +12,27 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 $secret_key = "YOUR_SECRET_KEY";
 $jwt = null;
-$Id = "";
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
 $data = json_decode(file_get_contents("php://input"));
-$Id = $data->Id;
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
 $arr = explode(" ", $authHeader);
 $jwt = $arr[1];
 if($jwt){
-
 try {
 
 $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
 
-
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
-$conn1 = $databaseService->getConnection();
 
-$stmt = $conn->prepare("SELECT * FROM `user` where `Id` = :Id ");
+$stmt = $conn->prepare("SELECT Id,Name FROM  `StateMaster`  ");
 
-$stmt->bindParam(':Id', $Id);
-if($stmt->execute()){
-    
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    http_response_code(200);
-        echo json_encode(array(  "Data" => $row , "status" => "True", "message" => "User Details."));
+if($stmt->execute($datarow)){
+    $row = $stmt->fetchall(PDO::FETCH_ASSOC);
+
+        http_response_code(200);
+        echo json_encode(array(  "Data" => $row , "status" => "True", "message" => "States Details."));
 }
 else{
         http_response_code(400);
@@ -46,17 +40,11 @@ else{
 }
 
 }catch (Exception $e){
-
     http_response_code(401);
-
     echo json_encode(array(
         "message" => "Access denied.",
         "error" => $e->getMessage()
     ));
-
-    // If user is super admin then register.
 }
-
 }
-
 ?>

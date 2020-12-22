@@ -25,59 +25,38 @@ if($jwt){
 try {
 
 $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
-$Name ="";
-$UserTypes = "";
+$Id ="";
 
 
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
-$conn2 = $databaseService->getConnection();
 
-$Name = $data->Name;
-$UserTypes  = $data->UserTypes;
+//$Id = $data->Id;
+
+//$stmt = $conn->prepare("CALL deleteWine('$Id')");
 
 
-//$CreatedById = $data->CreatedById;
-$CreatedById = 1;
+$Id = $data->Id;
+$StatusId = 0;
+$StatusName = 'InActive';
 
-$stmt = $conn->prepare("CALL Inswinetype('$Name','1','Active','$CreatedById',@Last_ID)");
-$stmt->execute();
+$table_name = 'user';
+  $query = "UPDATE " . $table_name . "
+                SET StatusId = :StatusId,StatusName = :StatusName  WHERE Id =:Id ";
+                    //echo  $query;exit;
 
-$rs2 = $conn->query("SELECT @Last_ID  as id");
-$row = $rs2->fetchObject();
-$last_id = $row->id;
+$stmt = $conn->prepare($query);
 
-$StatusId = 1;
-$StatusName = "Active";
-$CreatedById = "1";
+$stmt->bindParam(':Id', $Id);
+$stmt->bindParam(':StatusId', $StatusId);
+$stmt->bindParam(':StatusName', $StatusName);
 
-$table_name2 = 'winetypeusermapping';
-$ok = true;
-foreach($UserTypes  as $value ){
 
-$UserTypeId = $value;
-$query = "INSERT INTO " . $table_name2 . "
-                SET WineTypeId = :WineTypeId,
-                    UserTypeId = :UserTypeId,
-                    StatusId = :StatusId,
-                    StatusName = :StatusName,
-                    CreatedById = :CreatedById";
-
-$stmt2 = $conn2->prepare($query);
-$stmt2->bindParam(':WineTypeId', $last_id);
-$stmt2->bindParam(':UserTypeId', $UserTypeId );
-$stmt2->bindParam(':StatusId', $StatusId);
-$stmt2->bindParam(':StatusName', $StatusName);
-$stmt2->bindParam(':CreatedById', $CreatedById);
-$stmt2->execute();
-
-}
-if($ok){
-   
+if($stmt->execute()){
+    
     
         http_response_code(200);
-       
-         echo json_encode(array( "status" => "True","message" => "WineType added successfully."));
+        echo json_encode(array("status" => "True", "message" => "Delete User successfully."));
 }
 else{
         http_response_code(400);

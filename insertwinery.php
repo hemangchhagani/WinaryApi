@@ -28,6 +28,10 @@ try {
 $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
 $Name ="";
 $Description ="";
+$StateId ="";
+$StateName ="";
+$CityId ="";
+$CityName ="";
 $AddressLine1 ="";
 $AddressLine2 ="";
 $Email ="";
@@ -44,6 +48,10 @@ $conn = $databaseService->getConnection();
 
 $Name = $data[Name];
 $Description = $data[Description];
+$StateId = $data[StateId];
+$StateName = $data[StateName];
+$CityId = $data[CityId];
+$CityName = $data[CityName];
 $WineTypeIds = $data[WineTypeIds];
 $AddressLine1 = $data[AddressLine1];
 $AddressLine2 = $data[AddressLine2];
@@ -55,7 +63,7 @@ $Longitude = $data[Longitude];
 $CreatedById = $data[CreatedById];
 $Images = $data[Images];
 
-$stmt = $conn->prepare("CALL Inswinerydesc('$Name','$Description','$AddressLine1','$AddressLine2','$Email','$PhoneNumber', '$Mobile' ,'$Latitude','$Longitude','1','Active','$CreatedById',@Last_ID)");
+$stmt = $conn->prepare("CALL Inswinerydesc('$Name','$Description','$StateId' ,'$StateName','$CityId','$CityName','$AddressLine1','$AddressLine2','$Email','$PhoneNumber', '$Mobile' ,'$Latitude','$Longitude','1','Active','$CreatedById',@Last_ID)");
  $stmt->execute();
 $rs2 = $conn->query("SELECT @Last_ID  as id");
 $row = $rs2->fetchObject();

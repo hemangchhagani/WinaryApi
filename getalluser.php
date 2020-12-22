@@ -31,14 +31,32 @@ $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
 $conn1 = $databaseService->getConnection();
 
-$stmt = $conn->prepare("SELECT * FROM `user` where `Id` = :Id ");
+$stmt = $conn->prepare("SELECT * FROM `user` where statusId ='1' ");
 
-$stmt->bindParam(':Id', $Id);
+
 if($stmt->execute()){
     
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $row = $stmt->fetchall(PDO::FETCH_ASSOC);
+    
+    
     http_response_code(200);
-        echo json_encode(array(  "Data" => $row , "status" => "True", "message" => "User Details."));
+    
+   // $modifiedPro = $row->getIterator();
+foreach($row as $key=>$row2) {
+     $row3['Id'] = "{$row2[Id]}";
+     $row3['Name'] = "{$row2[firstname]} {$row2[lastname]}";
+     $row3['Firstname'] = "{$row2[firstname]}";
+     $row3['Lastname'] = "{$row2[lastname]}";
+     $row3['Email'] = "{$row2[email]}";
+     $row3['Mobile'] = "{$row2[mobile]}";
+      $row3['Password'] = "{$row2[password]}";
+   
+    
+    //$modifiedPro[$key]->name ="{$row[firstname]} {$row[lastname]}";
+    $modifiedPro[$key] =$row3;
+  
+}
+        echo json_encode(array(  "Data" => $modifiedPro , "status" => "True", "message" => "User Details."));
 }
 else{
         http_response_code(400);

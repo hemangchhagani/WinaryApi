@@ -20,43 +20,23 @@ $Id = $data->Id;
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
 $arr = explode(" ", $authHeader);
 $jwt = $arr[1];
-if($jwt){
-
-try {
-
-$decoded = JWT::decode($jwt, $secret_key, array('HS256'));
-
 
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
 $conn1 = $databaseService->getConnection();
 
-$stmt = $conn->prepare("SELECT * FROM `user` where `Id` = :Id ");
+$stmt = $conn->prepare("SELECT * FROM `UserType` ");
 
-$stmt->bindParam(':Id', $Id);
 if($stmt->execute()){
     
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $row = $stmt->fetchall(PDO::FETCH_ASSOC);
     http_response_code(200);
-        echo json_encode(array(  "Data" => $row , "status" => "True", "message" => "User Details."));
+        echo json_encode(array(  "Data" => $row , "status" => "True", "message" => "User Type Details."));
 }
 else{
         http_response_code(400);
         echo json_encode(array("message" => "Unable to register the user."));
 }
 
-}catch (Exception $e){
-
-    http_response_code(401);
-
-    echo json_encode(array(
-        "message" => "Access denied.",
-        "error" => $e->getMessage()
-    ));
-
-    // If user is super admin then register.
-}
-
-}
 
 ?>

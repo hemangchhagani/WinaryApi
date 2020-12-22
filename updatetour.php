@@ -12,11 +12,11 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 $secret_key = "YOUR_SECRET_KEY";
 $jwt = null;
-$Id = "";
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
+
 $data = json_decode(file_get_contents("php://input"));
-$Id = $data->Id;
+//echo "<pre>";print_r($data->Name);exit;
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
 $arr = explode(" ", $authHeader);
 $jwt = $arr[1];
@@ -25,20 +25,36 @@ if($jwt){
 try {
 
 $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
-
+$Id = "";
+$TourDate =" ";
+$UserId =" ";
+$StatusId =" ";
+$ModifiedById ="";
 
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
-$conn1 = $databaseService->getConnection();
 
-$stmt = $conn->prepare("SELECT * FROM `user` where `Id` = :Id ");
+$Id = $data->Id;
+$TourDate = $data->TourDate;
+$UserId = $data->UserId;
+$StatusId = $data->StatusId;
+$ModifiedById = '1';
 
+
+$table_name = 'tour';
+$query = "UPDATE " . $table_name . "
+                SET TourDate = :TourDate,UserId = :UserId, StatusId = :StatusId WHERE Id =:Id ";
+                    //echo  $query;exit;
+
+$stmt = $conn->prepare($query);
 $stmt->bindParam(':Id', $Id);
+$stmt->bindParam(':TourDate', $TourDate);
+$stmt->bindParam(':UserId', $UserId);
+$stmt->bindParam(':StatusId', $StatusId);
+
 if($stmt->execute()){
-    
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    http_response_code(200);
-        echo json_encode(array(  "Data" => $row , "status" => "True", "message" => "User Details."));
+       http_response_code(200);
+       echo json_encode(array( "status" => "True","message" => "Tour Updated successfully."));
 }
 else{
         http_response_code(400);
@@ -46,17 +62,12 @@ else{
 }
 
 }catch (Exception $e){
-
     http_response_code(401);
-
     echo json_encode(array(
         "message" => "Access denied.",
         "error" => $e->getMessage()
     ));
-
     // If user is super admin then register.
 }
-
 }
-
 ?>
