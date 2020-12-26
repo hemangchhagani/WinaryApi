@@ -1,5 +1,5 @@
 <?php
-//include_once 'error.php';
+include_once 'error.php';
 
 include_once './config/database.php';
 require "vendor/autoload.php";
@@ -45,6 +45,7 @@ $email = '';
 $password = '';
 //$RoleId = '';
 $mobile = '';
+$DateOfBirth = '';
 $getConnection	 = null;
 
 $databaseService = new DatabaseService();
@@ -57,6 +58,11 @@ $lastname = $data->lastname;
 $email = $data->email;
 $password = $data->password;
 $mobile = $data->mobile;
+if(isset($data->DateOfBirth)){
+   $DateOfBirth = $data->DateOfBirth; 
+}else{
+    $DateOfBirth ='Null';
+}
 //$RoleId = $data->RoleId;
 
 $table_name = 'user';
@@ -78,15 +84,15 @@ $query = "INSERT INTO " . $table_name . "
                     lastname = :lastname,
                     email = :email,
                     password = :password,
-                    mobile = :mobile,statusname = :statusname";
+                    mobile = :mobile,
+                    DateOfBirth = :DateOfBirth";
 
 $stmt = $conn->prepare($query);
 $stmt->bindParam(':firstname', $firstname);
 $stmt->bindParam(':lastname', $lastname);
 $stmt->bindParam(':email', $email);
 $stmt->bindParam(':mobile', $mobile);
-$stmt->bindParam(':statusname', 'Active');
-//$stmt->bindParam(':RoleId', $RoleId);
+$stmt->bindParam(':DateOfBirth', $DateOfBirth);
 
 $password_hash = password_hash($password, PASSWORD_BCRYPT);
 $stmt->bindParam(':password', $password_hash);

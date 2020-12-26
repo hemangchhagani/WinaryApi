@@ -27,12 +27,7 @@ try {
 $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
 
 
-$databaseService = new DatabaseService();
-$conn = $databaseService->getConnection();
-$conn1 = $databaseService->getConnection();
-
 $stmt = $conn->prepare("SELECT * FROM `user` where statusId ='1' ");
-
 
 if($stmt->execute()){
     
@@ -49,6 +44,7 @@ foreach($row as $key=>$row2) {
      $row3['Lastname'] = "{$row2[lastname]}";
      $row3['Email'] = "{$row2[email]}";
      $row3['Mobile'] = "{$row2[mobile]}";
+      $row3['DateOfBirth'] = "{$row2[DateOfBirth]}";
       $row3['Password'] = "{$row2[password]}";
    
     

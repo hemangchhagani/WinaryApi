@@ -29,7 +29,6 @@ $decoded = JWT::decode($jwt, $secret_key, array('HS256'));
 
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
-$conn1 = $databaseService->getConnection();
 
 $stmt = $conn->prepare("SELECT * FROM `user` where `Id` = :Id ");
 
